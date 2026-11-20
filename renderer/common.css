@@ -1,0 +1,95 @@
+:root {
+  --font: 'Segoe UI Variable Text', 'Segoe UI', 'Microsoft YaHei UI', 'Microsoft YaHei', 'PingFang SC', 'Noto Sans SC', sans-serif;
+  --mono: 'Cascadia Mono', Consolas, ui-monospace, monospace;
+  --accent: #0067c0;
+  --accent-fg: #ffffff;
+  --danger: #c42b1c;
+  --bg: #f3f3f3;
+  --card: #fbfbfb;
+  --card-border: #e5e5e5;
+  --text: #1f1f1f;
+  --text-2: #5c5c5c;
+  --input: #ffffff;
+  --input-border: #d1d1d1;
+  --hover: rgba(0, 0, 0, 0.05);
+  --menu: rgba(249, 249, 249, 0.97);
+  --menu-border: rgba(0, 0, 0, 0.1);
+  --shadow: 0 16px 40px rgba(0, 0, 0, 0.28);
+  --c-yellow: 255 211 92;  --n-yellow: 255 240 184;
+  --c-green: 111 214 168;  --n-green: 208 244 226;
+  --c-blue: 115 178 255;   --n-blue: 214 232 255;
+  --c-pink: 255 158 192;   --n-pink: 255 222 234;
+  --c-purple: 195 166 255; --n-purple: 233 224 255;
+  --c-gray: 200 200 200;   --n-gray: 240 240 240;
+  --note-text: #2b2410;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --accent: #4cc2ff;
+    --accent-fg: #00213a;
+    --danger: #ff99a4;
+    --bg: #202020;
+    --card: #2b2b2b;
+    --card-border: #383838;
+    --text: #f2f2f2;
+    --text-2: #b4b4b4;
+    --input: #2d2d2d;
+    --input-border: #4a4a4a;
+    --hover: rgba(255, 255, 255, 0.06);
+    --menu: rgba(44, 44, 44, 0.97);
+    --menu-border: rgba(255, 255, 255, 0.1);
+    --shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+    --n-yellow: 52 46 30; --n-green: 30 48 40; --n-blue: 30 40 56; --n-pink: 54 34 42; --n-purple: 42 36 58; --n-gray: 44 44 44;
+    --note-text: #ececec;
+    color-scheme: dark;
+  }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; font-family: var(--font); color: var(--text); font-size: 14px; }
+button { font-family: inherit; font-size: 13px; color: inherit; cursor: default; }
+input, textarea, select { font-family: inherit; font-size: 14px; color: var(--text); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+.btn {
+  height: 32px; padding: 0 14px; border-radius: 4px; border: 1px solid var(--input-border);
+  background: var(--input); display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap;
+}
+.btn:hover { background: var(--hover); }
+.btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); font-weight: 600; }
+.btn.primary:hover { filter: brightness(1.08); }
+.btn.danger { color: var(--danger); }
+.field {
+  height: 34px; padding: 0 10px; border-radius: 4px; border: 1px solid var(--input-border);
+  border-bottom: 2px solid var(--input-border); background: var(--input); outline: none;
+}
+.field:focus { border-bottom-color: var(--accent); }
+
+.menu {
+  position: absolute; z-index: 1000; min-width: 220px; padding: 4px; border-radius: 8px;
+  background: var(--menu); border: 1px solid var(--menu-border); box-shadow: var(--shadow);
+  backdrop-filter: blur(30px); display: flex; flex-direction: column;
+}
+.menu .mi {
+  display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 12px; border-radius: 4px;
+  font-size: 13px; border: none; background: transparent; text-align: left; width: 100%;
+}
+.menu .mi:hover { background: var(--hover); }
+.menu .mi .k { margin-left: auto; color: var(--text-2); font-size: 12px; }
+.menu .mi.danger { color: var(--danger); }
+.menu .sep { height: 1px; background: var(--menu-border); margin: 4px 0; }
+.swatches { display: flex; gap: 8px; padding: 8px 12px; }
+.sw { width: 20px; height: 20px; border-radius: 10px; border: none; padding: 0; }
+.sw.on { box-shadow: 0 0 0 2px var(--menu), 0 0 0 4px var(--accent); }
+
+.toggle { position: relative; width: 40px; height: 20px; flex-shrink: 0; }
+.toggle input { position: absolute; inset: 0; opacity: 0; margin: 0; }
+.toggle span { position: absolute; inset: 0; border-radius: 10px; border: 1px solid var(--text-2); transition: .15s; pointer-events: none; }
+.toggle span::after { content: ''; position: absolute; left: 4px; top: 3px; width: 12px; height: 12px; border-radius: 6px; background: var(--text-2); transition: .15s; }
+.toggle input:checked + span { background: var(--accent); border-color: var(--accent); }
+.toggle input:checked + span::after { left: 23px; background: var(--accent-fg); }
+.toggle input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: rgba(128, 128, 128, 0.4); border-radius: 4px; }
+::-webkit-scrollbar-track { background: transparent; }

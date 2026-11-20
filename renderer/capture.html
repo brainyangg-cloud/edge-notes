@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'">
+<title>快速记录</title>
+<link rel="stylesheet" href="common.css">
+<style>
+html, body { background: transparent; height: 100%; overflow: hidden; }
+.card {
+  position: absolute; inset: 10px; border-radius: 10px; background: var(--menu); border: 1px solid var(--menu-border);
+  box-shadow: 0 10px 30px rgba(0,0,0,.3); padding: 14px 18px; display: flex; flex-direction: column; gap: 8px;
+}
+label { font-size: 12px; color: var(--text-2); display: flex; justify-content: space-between; }
+textarea {
+  border: none; border-bottom: 2px solid var(--accent); outline: none; background: transparent; resize: none;
+  font-size: 18px; line-height: 1.5; padding: 4px 0; height: 62px;
+}
+#hint { font-size: 12px; color: var(--text-2); min-height: 18px; }
+#hint b { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="card">
+  <label for="t"><span>快速记录</span><span>Enter 保存 · Shift+Enter 换行 · Esc 关闭</span></label>
+  <textarea id="t" placeholder="想到什么就写下来，例如：明早 9 点给房东转账" autofocus></textarea>
+  <div id="hint">写上时间（如“明天下午3点”“20分钟后”）会自动设提醒</div>
+</div>
+<script src="common.js"></script>
+<script src="capture.js"></script>
+</body>
+</html>

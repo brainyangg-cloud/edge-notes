@@ -1,0 +1,79 @@
+{
+  "name": "edge-notes",
+  "productName": "边缘便签",
+  "version": "1.0.0",
+  "description": "藏在屏幕边缘的半透明便签：图文、清单、到点提醒",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win --x64 --publish never",
+    "release": "electron-builder --win --x64 --publish always"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "33.2.1",
+    "electron-builder": "25.1.8"
+  },
+  "author": "brainyangg-cloud",
+  "homepage": "https://github.com/brainyangg-cloud/edge-notes",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/brainyangg-cloud/edge-notes.git"
+  },
+  "build": {
+    "appId": "com.edgenotes.app",
+    "productName": "边缘便签",
+    "copyright": "Copyright © 2026",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "updater.js",
+      "renderer/**",
+      "assets/**",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.ico",
+      "artifactName": "EdgeNotes-Setup-${version}.${ext}",
+      "executableName": "EdgeNotes"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "边缘便签",
+      "uninstallDisplayName": "边缘便签",
+      "installerLanguages": [
+        "zh_CN"
+      ],
+      "language": "2052",
+      "runAfterFinish": true,
+      "deleteAppDataOnUninstall": false
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "brainyangg-cloud",
+        "repo": "edge-notes",
+        "releaseType": "release"
+      }
+    ]
+  },
+  "dependencies": {
+    "electron-updater": "6.3.9"
+  }
+}

@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'">
+<title>欢迎使用边缘便签</title>
+<link rel="stylesheet" href="common.css">
+<style>
+body { background: var(--bg); padding: 30px 36px; height: 100vh; display: flex; flex-direction: column; gap: 22px; overflow: hidden; }
+h1 { margin: 0; font-size: 28px; font-weight: 600; }
+.sub { color: var(--text-2); margin-top: 6px; }
+.steps { display: flex; gap: 22px; }
+.step { flex: 1; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px; }
+.ill { width: 100%; height: 120px; border-radius: 8px; background: var(--card); border: 1px solid var(--card-border); position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; gap: 6px; }
+.num { width: 24px; height: 24px; border-radius: 12px; background: var(--accent); color: var(--accent-fg); font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.step b { font-size: 15px; } .step span { font-size: 13px; color: var(--text-2); }
+.kbd { padding: 6px 8px; border-radius: 4px; background: var(--input); border: 1px solid var(--input-border); font-family: var(--mono); font-size: 12px; }
+footer { margin-top: auto; display: flex; align-items: center; gap: 18px; padding-top: 16px; border-top: 1px solid var(--card-border); }
+footer label { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+footer input { accent-color: var(--accent); }
+.seg { display: flex; gap: 2px; padding: 2px; border-radius: 4px; background: var(--hover); }
+.seg button { height: 28px; padding: 0 12px; border: none; background: transparent; border-radius: 3px; }
+.seg button.on { background: var(--input); box-shadow: 0 1px 2px rgba(0,0,0,.18); font-weight: 600; }
+</style>
+</head>
+<body>
+<div><h1>欢迎使用边缘便签</h1><div class="sub">便签平时藏在屏幕边缘，不占地方，要用时一碰就出来。三步上手：</div></div>
+<div class="steps">
+  <div class="step"><div class="ill"><div style="position:absolute;right:0;top:30px;width:8px;height:60px;background:#73b2ff;border-radius:4px 0 0 4px"></div><svg width="22" height="26" viewBox="0 0 26 30" aria-hidden="true" style="position:absolute;right:16px;top:50px"><path d="M3 2l18 12-8 2 5 10-4 2-5-10-6 6z" fill="#fff" stroke="#111" stroke-width="1.5" stroke-linejoin="round"/></svg></div><span class="num">1</span><b>鼠标移到屏幕边缘的细线</b><span>所有便签会变成标签滑出来</span></div>
+  <div class="step"><div class="ill"><div style="position:absolute;right:0;top:12px;width:26px;height:60px;background:#ffd35c;border-radius:4px 0 0 4px"></div><div style="position:absolute;right:0;top:40px;width:26px;height:60px;background:#6fd6a8;border-radius:4px 0 0 4px"></div><div style="position:absolute;right:32px;top:16px;width:110px;height:88px;background:#fff0b8;border-radius:4px;box-shadow:0 4px 10px rgba(0,0,0,.15)"></div></div><span class="num">2</span><b>点标签打开便签</b><span>文字、截图（Ctrl+V）、清单都能放</span></div>
+  <div class="step"><div class="ill"><span class="kbd">Ctrl</span><span class="kbd">Shift</span><span class="kbd">Space</span></div><span class="num">3</span><b>随时快速记一笔</b><span>写上“明早 9 点”会自动设提醒</span></div>
+</div>
+<footer>
+  <label><input type="checkbox" id="auto" checked>开机自动启动</label>
+  <span style="font-size:13px">停靠在</span><div class="seg" id="dock"><button data-v="left">左侧</button><button data-v="right" class="on">右侧</button></div>
+  <span style="flex:1"></span>
+  <button class="btn primary" id="go" style="height:36px;padding:0 24px">开始使用</button>
+</footer>
+<script src="welcome.js"></script>
+</body>
+</html>

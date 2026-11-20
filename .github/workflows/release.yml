@@ -1,0 +1,45 @@
+name: Release
+
+# 推送 v* 标签（例如 v1.0.1）时：在 Windows 上打包安装程序并发布到 GitHub Releases。
+# 已安装的“边缘便签”会自动从 Releases 下载新版本。
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Check version matches tag
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: bash
+        run: |
+          PKG=$(node -p "require('./package.json').version")
+          TAG=${GITHUB_REF_NAME#v}
+          if [ "$PKG" != "$TAG" ]; then echo "package.json 版本 $PKG 与标签 $TAG 不一致"; exit 1; fi
+
+      - run: npm ci
+
+      - name: Build installer and publish release
+        env:
+          # 发布到同一个仓库用 GITHUB_TOKEN 即可；发布到另一个仓库需要在 Secrets 里设置 RELEASE_TOKEN
+          GH_TOKEN: ${{ secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN }}
+        run: npx electron-builder --win --x64 --publish always
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: EdgeNotes-installer
+          path: |
+            dist/*.exe
+            dist/latest.yml
