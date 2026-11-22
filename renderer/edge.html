@@ -46,6 +46,29 @@
       <div class="row"><button class="btn" id="alarmRemove">移除提醒</button><button class="btn" id="alarmCancel">取消</button><button class="btn primary" id="alarmSave">保存</button></div>
     </div>
     <input type="file" id="file" accept="image/*" multiple hidden>
+    <div id="imgLayer" aria-hidden="true">
+      <div id="imgBox" title="拖动摆放位置 · 拖角缩放（Shift 自由拉伸）· 双击看大图">
+        <span class="ih" data-dir="nw"></span><span class="ih" data-dir="n"></span><span class="ih" data-dir="ne"></span>
+        <span class="ih" data-dir="e"></span><span class="ih" data-dir="se"></span><span class="ih" data-dir="s"></span>
+        <span class="ih" data-dir="sw"></span><span class="ih" data-dir="w"></span>
+        <span id="imgSize"></span>
+      </div>
+    </div>
+    <div id="imgBar" role="toolbar" aria-label="图片">
+      <button data-a="inline" title="嵌入文字中：随文字排列">嵌入文字</button>
+      <button data-a="free" title="自由摆放：拖到便签里任意位置">自由摆放</button>
+      <span class="bsep"></span>
+      <button class="inl" data-align="left" title="靠左" aria-label="靠左"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="6" width="9" height="8" rx="1"/><path d="M3 18h18"/></svg></button>
+      <button class="inl" data-align="center" title="居中" aria-label="居中"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="7.5" y="6" width="9" height="8" rx="1"/><path d="M3 18h18"/></svg></button>
+      <button class="inl" data-align="right" title="靠右" aria-label="靠右"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="12" y="6" width="9" height="8" rx="1"/><path d="M3 18h18"/></svg></button>
+      <button class="inl" data-align="wrap-left" title="文字环绕（图在左）" aria-label="文字环绕，图在左"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="8" height="8" rx="1"/><path d="M14 6h7M14 10h7M3 17h18M3 21h12"/></svg></button>
+      <button class="inl" data-align="wrap-right" title="文字环绕（图在右）" aria-label="文字环绕，图在右"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="13" y="5" width="8" height="8" rx="1"/><path d="M3 6h7M3 10h7M3 17h18M3 21h12"/></svg></button>
+      <button class="frl" data-a="front" title="置于顶层">置顶</button>
+      <span class="bsep"></span>
+      <button data-a="natural" title="原始大小">1:1</button>
+      <button data-a="fit" title="适应便签宽度">适宽</button>
+      <button data-a="del" title="删除图片 (Del)" aria-label="删除图片"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg></button>
+    </div>
   </section>
 
   <div id="remindCard" class="hit" role="alert">
@@ -61,5 +84,6 @@
 
   <script src="common.js"></script>
   <script src="edge.js"></script>
+  <script src="imgedit.js"></script>
 </body>
 </html>

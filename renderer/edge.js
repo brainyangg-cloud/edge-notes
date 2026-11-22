@@ -13,6 +13,7 @@ let sticky = false;          // opened by keyboard/tray: don't collapse on mouse
 let hoverTimer = 0, leaveTimer = 0, previewTimer = 0, saveTimer = 0, titleTimer = 0, cardTimer = 0, toastTimer = 0;
 let pendingSave = false;
 let drag = null;
+let imgDragging = false;     // image move/resize in progress (see imgedit.js)
 let tabTops = {};            // id -> top px (for panel placement)
 let lastDeleted = null;
 const MAX_TABS = 5;
@@ -43,14 +44,14 @@ function setOver(v) {
   }
 }
 document.addEventListener('mousemove', (e) => {
-  if (drag) return;
+  if (drag || imgDragging) return;
   const hit = !!e.target.closest('.hit');
   setOver(hit);
   if (hit && state === 'rest' && e.target.closest('#strip')) {
     if (!hoverTimer) hoverTimer = setTimeout(() => { hoverTimer = 0; if (overHit) setState('fan'); }, Number(settings.hoverDelay) || 150);
   }
 });
-document.addEventListener('mouseleave', () => { if (!drag) setOver(false); });
+document.addEventListener('mouseleave', () => { if (!drag && !imgDragging) setOver(false); });
 
 function onLeave() {
   if (overHit || sticky || drag) return;
@@ -506,8 +507,6 @@ editor.addEventListener('mousedown', (e) => {
     t.dataset.done = t.dataset.done === '1' ? '0' : '1';
     scheduleSave();
   }
-  editor.querySelectorAll('img.sel').forEach(i => i.classList.remove('sel'));
-  if (e.target.tagName === 'IMG') e.target.classList.add('sel');
 });
 
 // ---------------- images ----------------
@@ -544,25 +543,7 @@ $('#file').addEventListener('change', async (e) => {
   for (const f of e.target.files) await insertImageFile(f);
   e.target.value = '';
 });
-editor.addEventListener('dblclick', (e) => {
-  if (e.target.tagName === 'IMG' && e.target.dataset.img) window.api.openViewer(openId, e.target.dataset.img);
-});
-editor.addEventListener('contextmenu', (e) => {
-  const img = e.target.closest('img[data-img]');
-  if (!img) return;
-  e.preventDefault();
-  showMenu(`<button class="mi" data-a="view">查看大图</button><button class="mi" data-a="copy">复制图片</button><button class="mi" data-a="save">另存为…</button><div class="sep"></div><button class="mi danger" data-a="del">删除图片</button>`, e.clientX, e.clientY);
-  menu.onclick = (ev) => {
-    const b = ev.target.closest('button');
-    if (!b) return;
-    hideMenu();
-    const a = b.dataset.a;
-    if (a === 'view') window.api.openViewer(openId, img.dataset.img);
-    else if (a === 'copy') { window.api.copyImage(img.dataset.img); flash('图片已复制'); }
-    else if (a === 'save') window.api.saveImageAs(img.dataset.img);
-    else if (a === 'del') { img.remove(); scheduleSave(); }
-  };
-});
+// image double-click / right-click / move / resize: see imgedit.js
 
 // ---------------- header buttons & shortcuts ----------------
 $('#bTask').addEventListener('click', toggleTask);
