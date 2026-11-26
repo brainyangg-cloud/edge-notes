@@ -242,7 +242,7 @@ deck.addEventListener('contextmenu', (e) => {
 });
 addBtn.addEventListener('click', async () => {
   const n = await window.api.createNote({ title: '新便签' });
-  notes.push(n);
+  if (!byId(n.id)) notes.push(n);
   openNote(n.id, { focus: true, selectTitle: true });
 });
 
@@ -348,8 +348,10 @@ function openNote(id, opts = {}) {
   panel.style.height = h + 'px';
   panel.style.top = top + 'px';
   titleEl.value = n.title || '';
-  editor.innerHTML = n.html || '';
+  editor.innerHTML = n.html || '<div><br></div>';
   fixImages(editor, imgBase);
+  normalizeBlocks();
+  updateBlank();
   renderPanelChrome(n);
   $('#saved').textContent = '';
   if (opts.external) { window.api.focusEdge(); sticky = true; }
@@ -375,8 +377,9 @@ function renderPanelChrome(n) {
   if (n.due) due.querySelector('.grow').textContent = `提醒到了 · ${fmtTime(n.dueAt || Date.now())}`;
   // reload content if changed elsewhere and user isn't typing
   if (!pendingSave && document.activeElement !== editor && editorHtml() !== (n.html || '')) {
-    editor.innerHTML = n.html || '';
+    editor.innerHTML = n.html || '<div><br></div>';
     fixImages(editor, imgBase);
+    updateBlank();
   }
 }
 $('#chipRow').addEventListener('click', (e) => { if (e.target.closest('.chip.alarm')) openAlarm(); });
@@ -395,7 +398,8 @@ function focusEditorEnd() {
 function editorHtml() {
   const c = editor.cloneNode(true);
   c.querySelectorAll('img[data-img]').forEach(i => { i.removeAttribute('src'); i.classList.remove('sel'); i.removeAttribute('class'); i.removeAttribute('draggable'); });
-  return c.innerHTML.replace(/ draggable="false"/g, '');
+  const h = c.innerHTML.replace(/ draggable="false"/g, '');
+  return h === '<div><br></div>' ? '' : h;
 }
 function scheduleSave() {
   pendingSave = true;
@@ -425,25 +429,93 @@ titleEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventD
 
 // ---------------- editor: blocks, tasks ----------------
 document.execCommand('defaultParagraphSeparator', false, 'div');
+// ---- selection helpers ----
+let lastRange = null; // last selection inside the editor (toolbar buttons steal focus)
+document.addEventListener('selectionchange', () => {
+  const s = getSelection();
+  if (s.rangeCount && editor.contains(s.getRangeAt(0).commonAncestorContainer)) {
+    lastRange = s.getRangeAt(0).cloneRange();
+    if (typeof syncFmt === 'function') syncFmt();
+  }
+});
+function restoreRange() {
+  if (document.activeElement !== editor) editor.focus({ preventScroll: true });
+  const s = getSelection();
+  if (lastRange && editor.contains(lastRange.startContainer) && editor.contains(lastRange.endContainer)) {
+    s.removeAllRanges(); s.addRange(lastRange);
+  } else if (!s.rangeCount || !editor.contains(s.anchorNode)) focusEditorEnd();
+}
+function saveSel() {
+  const s = getSelection();
+  if (!s.rangeCount) return null;
+  const pt = (n, o) => (n === editor ? (editor.childNodes[o] ? [editor.childNodes[o], 0] : [editor, -1]) : [n, o]);
+  const [an, ao] = pt(s.anchorNode, s.anchorOffset);
+  const [fn, fo] = pt(s.focusNode, s.focusOffset);
+  return { an, ao, fn, fo };
+}
+function restoreSel(p) {
+  if (!p) return;
+  const fix = (n, o) => (o === -1 ? [editor, editor.childNodes.length] : [n, Math.min(o, n.nodeType === 3 ? n.length : n.childNodes.length)]);
+  if (!editor.contains(p.an) || !editor.contains(p.fn)) return;
+  const [an, ao] = fix(p.an, p.ao);
+  const [fn, fo] = fix(p.fn, p.fo);
+  try { getSelection().setBaseAndExtent(an, ao, fn, fo); } catch (e) { /* ignore */ }
+}
+
+// ---- blocks (each line is a top-level <div>) ----
+const BLOCK_RE = /^(DIV|P|UL|OL|H[1-6]|BLOCKQUOTE|PRE|TABLE|IMG)$/;
+const isBlock = (n) => n.nodeType === 1 && BLOCK_RE.test(n.tagName);
+// Wrap stray top-level text / inline nodes into <div> lines, keeping the caret where it was.
+function normalizeBlocks() {
+  if (![...editor.childNodes].some(n => !isBlock(n) && !(n.nodeType === 3 && !n.textContent.trim() && /\n/.test(n.textContent)))) return;
+  const sel = saveSel();
+  let run = [];
+  const flush = () => {
+    if (!run.length) return;
+    const d = document.createElement('div');
+    run[0].before(d);
+    run.forEach(n => d.appendChild(n));
+    if (!d.textContent && !d.querySelector('br,img')) d.appendChild(document.createElement('br'));
+    run = [];
+  };
+  for (const n of [...editor.childNodes]) {
+    if (isBlock(n)) { flush(); continue; }
+    if (n.nodeType === 3 && !n.textContent.trim() && /\n/.test(n.textContent) && !run.length) continue;
+    run.push(n);
+    if (n.nodeName === 'BR') flush();
+  }
+  flush();
+  restoreSel(sel);
+}
+function blockOf(node) {
+  if (!node || node === editor || !editor.contains(node)) return null;
+  while (node.parentNode !== editor) node = node.parentNode;
+  return node;
+}
+// Non-mutating: the line the caret is on.
 function currentBlock() {
   const s = getSelection();
   if (!s.rangeCount) return null;
-  let node = s.anchorNode;
-  if (!node || !editor.contains(node)) return null;
-  if (node === editor) {
-    node = editor.childNodes[s.anchorOffset] || editor.lastChild;
-    if (!node) return null;
+  let n = s.anchorNode;
+  if (n === editor) n = editor.childNodes[s.anchorOffset] || editor.childNodes[s.anchorOffset - 1];
+  return blockOf(n);
+}
+// Lines touched by the selection (ignores a line the selection only reaches at its very start).
+function selectedBlocks() {
+  normalizeBlocks();
+  const s = getSelection();
+  if (!s.rangeCount) return [];
+  const r = s.getRangeAt(0);
+  if (!editor.contains(r.commonAncestorContainer) && r.commonAncestorContainer !== editor) return [];
+  if (r.collapsed) { const b = currentBlock(); return b && b.tagName !== 'IMG' ? [b] : []; }
+  const list = [...editor.childNodes].filter(c => c.nodeType === 1 && c.tagName !== 'IMG' && r.intersectsNode(c));
+  if (list.length > 1) {
+    const last = list[list.length - 1];
+    const pre = document.createRange();
+    pre.setStart(last, 0); pre.setEnd(r.endContainer, r.endOffset);
+    if (!pre.toString().length && !pre.cloneContents().querySelector('img')) list.pop();
   }
-  while (node && node.parentNode !== editor) node = node.parentNode;
-  if (node && node.nodeType === 3) {
-    const div = document.createElement('div');
-    node.replaceWith(div);
-    div.appendChild(node);
-    const r = document.createRange(); r.setStart(node, Math.min(s.anchorOffset, node.length)); r.collapse(true);
-    s.removeAllRanges(); s.addRange(r);
-    node = div;
-  }
-  return node;
+  return list;
 }
 function makeCb() { const cb = document.createElement('span'); cb.className = 'cb'; cb.contentEditable = 'false'; return cb; }
 function caretAfterCb(block) {
@@ -452,26 +524,41 @@ function caretAfterCb(block) {
   r.setStart(block, idx); r.collapse(true);
   const s = getSelection(); s.removeAllRanges(); s.addRange(r);
 }
-function toggleTask() {
-  if (document.activeElement !== editor) focusEditorEnd();
-  let b = currentBlock();
-  if (!b) {
-    b = document.createElement('div');
-    b.appendChild(document.createElement('br'));
-    editor.appendChild(b);
-  }
-  if (b.tagName === 'IMG') { const d = document.createElement('div'); d.appendChild(document.createElement('br')); b.after(d); b = d; }
-  if (b.classList && b.classList.contains('task')) {
-    b.classList.remove('task'); b.removeAttribute('data-done'); b.removeAttribute('class');
+function setTask(b, on) {
+  const is = b.classList.contains('task');
+  if (on && !is) { b.classList.add('task'); b.dataset.done = '0'; b.prepend(makeCb()); }
+  if (!on && is) {
+    b.classList.remove('task'); b.removeAttribute('data-done');
+    if (!b.className) b.removeAttribute('class');
     b.querySelectorAll('.cb').forEach(x => x.remove());
     if (!b.textContent && !b.querySelector('br,img')) b.appendChild(document.createElement('br'));
-  } else {
-    b.classList.add('task'); b.dataset.done = '0';
-    b.prepend(makeCb());
-    caretAfterCb(b);
   }
-  scheduleSave();
 }
+// Toggle checklist on the caret line, or on every line in the selection.
+function toggleTask() {
+  restoreRange();
+  const collapsed = getSelection().isCollapsed;
+  let blocks = selectedBlocks();
+  if (!blocks.length) {
+    const d = document.createElement('div');
+    d.appendChild(document.createElement('br'));
+    editor.appendChild(d);
+    blocks = [d];
+  }
+  const allTask = blocks.every(b => b.classList.contains('task'));
+  const keep = saveSel();
+  blocks.forEach(b => setTask(b, !allTask));
+  if (collapsed && blocks.length === 1) {
+    if (!allTask) caretAfterCb(blocks[0]);
+    else { const r = document.createRange(); r.selectNodeContents(blocks[0]); r.collapse(false); getSelection().removeAllRanges(); getSelection().addRange(r); }
+  } else restoreSel(keep);
+  scheduleSave();
+  updateBlank();
+}
+function updateBlank() {
+  editor.classList.toggle('blank', !editor.textContent.replace(/​/g, '').trim() && !editor.querySelector('img,.task,li'));
+}
+editor.addEventListener('input', () => { updateBlank(); });
 editor.addEventListener('keydown', (e) => {
   if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
     const b = currentBlock();
@@ -546,6 +633,7 @@ $('#file').addEventListener('change', async (e) => {
 // image double-click / right-click / move / resize: see imgedit.js
 
 // ---------------- header buttons & shortcuts ----------------
+$('#head').addEventListener('mousedown', (e) => { if (e.target.closest('button')) e.preventDefault(); });
 $('#bTask').addEventListener('click', toggleTask);
 $('#bPin').addEventListener('click', () => { const n = byId(openId); if (n) updateNote(n.id, { pinned: !n.pinned }); });
 $('#bMore').addEventListener('click', (e) => { const r = e.currentTarget.getBoundingClientRect(); showNoteMenu(openId, settings.dock === 'left' ? r.left : r.right, r.bottom + 4, false); });

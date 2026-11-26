@@ -27,7 +27,7 @@ for (const d of [DATA, IMG_DIR, BK_DIR]) fs.mkdirSync(d, { recursive: true });
 const DEFAULT_SETTINGS = {
   dock: 'right', displayId: null, deckStyle: 'tabs', deckScale: 1, keepOpen: false,
   opacity: 0.82, hoverDelay: 150, leaveDelay: 600, theme: 'system', autostart: true,
-  defaultRemindMode: 'notify', welcomed: false, autoUpdate: true,
+  defaultRemindMode: 'notify', welcomed: false, autoUpdate: true, noteFont: '', noteFontSize: 14,
   shortcuts: { newNote: 'Ctrl+Alt+N', capture: 'Ctrl+Shift+Space', toggle: 'Ctrl+Alt+Space', all: 'Ctrl+Alt+A' }
 };
 

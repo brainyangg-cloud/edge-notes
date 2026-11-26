@@ -51,6 +51,17 @@ select.field { min-width: 150px; }
 
   <h1 id="look" style="margin-top:34px">外观</h1>
   <div class="card"><div>主题<div class="d">跟随系统时会随 Windows 深色/浅色自动切换</div></div><div class="ctl"><div class="seg" data-key="theme"><button data-v="system">跟随系统</button><button data-v="light">浅色</button><button data-v="dark">深色</button></div></div></div>
+  <div class="card"><div>便签默认字体<div class="d">选中文字后还可以在便签里单独改字体、字号、颜色</div></div><div class="ctl"><select class="field" data-key="noteFont" aria-label="便签默认字体">
+          <option value="">系统默认</option>
+          <option value="'Microsoft YaHei UI','Microsoft YaHei'">微软雅黑</option>
+          <option value="DengXian">等线</option>
+          <option value="SimHei">黑体</option>
+          <option value="SimSun">宋体</option>
+          <option value="KaiTi">楷体</option>
+          <option value="FangSong">仿宋</option>
+          <option value="'Segoe UI'">Segoe UI</option>
+          <option value="Consolas">Consolas</option>
+        </select><select class="field" data-key="noteFontSize" data-num="1" aria-label="便签默认字号" style="min-width:90px"><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="18">18</option><option value="20">20</option></select></div></div>
   <div class="card"><div>标签样式</div><div class="ctl"><div class="seg" data-key="deckStyle"><button data-v="tabs">带标题</button><button data-v="chips">只显示色块</button></div></div></div>
   <div class="card"><div>标签大小<div class="d">宽度、间距、字号一起缩放</div></div><div class="ctl"><input type="range" min="70" max="180" step="5" id="scale" aria-label="标签大小"><span class="val" id="scaleV"></span></div></div>
   <div class="card"><div>不透明度<div class="d">越低越透明，能看到后面的窗口</div></div><div class="ctl"><input type="range" min="40" max="100" step="2" id="opacity" aria-label="不透明度"><span class="val" id="opacityV"></span></div></div>
